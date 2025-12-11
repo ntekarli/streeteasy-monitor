@@ -14,8 +14,8 @@ Includes a Flask application that provides a messaging interface and displays co
 ### How it works
 1. Constructs a StreetEasy URL corresponding to search criteria
 2. Scrapes, parses and filters listings from search results page
-3. Messages any listings that haven't already been contacted
-4. Stores details of newly contacted listings in a database
+3. Notifies the user via email about new listings, runs every 30 minutes
+4. Stores details of listings in a database
 
 ## Table of Contents
 - [Usage](#Usage)  
