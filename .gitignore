@@ -20,4 +20,4 @@ flask_test/
 tests/
 archive/
 *.sqlite3
-.env.env
+.env
