@@ -8,4 +8,5 @@ def main(**kwargs):
 
 
 if __name__ == '__main__':
-    main(**Config.defaults)
+    cfg = Config()
+    main(**cfg.get_search_params())

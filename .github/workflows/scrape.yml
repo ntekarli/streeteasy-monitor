@@ -32,6 +32,14 @@ jobs:
           SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          MIN_PRICE: ${{ secrets.MIN_PRICE }}
+          MAX_PRICE: ${{ secrets.MAX_PRICE }}
+          MIN_BEDS: ${{ secrets.MIN_BEDS }}
+          MAX_BEDS: ${{ secrets.MAX_BEDS }}
+          BATHS: ${{ secrets.BATHS }}
+          AREAS: ${{ secrets.AREAS }}
+          AMENITIES: ${{ secrets.AMENITIES }}
+          NO_FEE: ${{ secrets.NO_FEE }}
         run: |
           PYTHONPATH=. python main.py
 

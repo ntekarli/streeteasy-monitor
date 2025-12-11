@@ -101,3 +101,38 @@ class Config:
             'name': self.env('NAME', default=''),
             'search_partners': None,
         }
+
+    def _parse_list(self, value: str):
+        """Parse a CSV or JSON-style list from an environment string."""
+        if not value:
+            return []
+        v = value.strip()
+        if v.startswith('['):
+            try:
+                import json
+
+                return json.loads(v)
+            except Exception:
+                pass
+        return [item.strip() for item in v.split(',') if item.strip()]
+
+    def get_search_params(self):
+        """Load search parameters from environment (or fall back to defaults).
+
+        Returns a dict suitable to pass into `main(**params)`.
+        """
+        # numeric fields - fall back to defaults if not set or empty
+        def _int_env(name, default):
+            s = self.env(name, default=str(default))
+            return int(s) if s and str(s).strip() != '' else int(default)
+
+        return {
+            'min_price': _int_env('MIN_PRICE', self.defaults['min_price']),
+            'max_price': _int_env('MAX_PRICE', self.defaults['max_price']),
+            'min_beds': _int_env('MIN_BEDS', self.defaults['min_beds']),
+            'max_beds': _int_env('MAX_BEDS', self.defaults['max_beds']),
+            'baths': _int_env('BATHS', self.defaults['baths']),
+            'areas': self._parse_list(self.env('AREAS', default=','.join(self.defaults['areas']))),
+            'amenities': self._parse_list(self.env('AMENITIES', default=','.join(self.defaults['amenities']))),
+            'no_fee': self.env('NO_FEE', default=str(self.defaults.get('no_fee', False))).lower() in ('1', 'true', 'yes'),
+        }
