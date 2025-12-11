@@ -23,9 +23,7 @@ class Monitor:
         self.session.close()
 
     def run(self):
+        """Fetch new listings and return them. Caller handles email/DB insertion."""
         self.search = Search(self)
         self.listings = self.search.fetch()
-        email_notifier = EmailNotifier(self.config.get_email_config())
-        for listing in self.listings:
-            if email_notifier.send_listing_notification(listing):
-                self.db.insert_new_listing(listing)
+        return self.listings

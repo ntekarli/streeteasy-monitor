@@ -66,15 +66,12 @@ class Config:
     def __init__(self):
         self.env = Env()
         self.env.read_env()
+        self._ua = UserAgent()  # Cache UserAgent instance for performance
 
     def get_headers(self):
-        self.ua = UserAgent()
-        self.random_user_agent = self.ua.random
-        self.default_user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'
-        self.user_agent = self.random_user_agent or self.default_user_agent
-
+        user_agent = self._ua.random or 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'
         return {
-            'user-agent': self.user_agent,
+            'user-agent': user_agent,
             'accept-language': 'en-US,en;q=0.9',
             'referer': 'https://streeteasy.com/',
             'cache-control': 'no-cache',
@@ -91,15 +88,6 @@ class Config:
             'username': self.env('SMTP_USERNAME', default=''),
             'password': self.env('SMTP_PASSWORD', default=''),
             'recipient': self.env('EMAIL_RECIPIENT', default=''),
-        }
-
-    def get_field_values(self):
-        return {
-            'message': self.env('MESSAGE', default=''),
-            'phone': self.env('PHONE', default=''),
-            'email': self.env('EMAIL', default=''),
-            'name': self.env('NAME', default=''),
-            'search_partners': None,
         }
 
     def _parse_list(self, value: str):
