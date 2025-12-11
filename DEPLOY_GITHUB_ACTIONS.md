@@ -26,7 +26,7 @@ git push origin main
 
 ### 3. Verify it's running
 - Go to your fork → "Actions" tab
-- You should see "StreetEasy Monitor - Scheduled Scraper"
+- You should see "StreetSweeper - Scheduled Scraper"
 - Click it to see runs, logs, and status
 
 ## How It Works
@@ -56,7 +56,7 @@ Edit `.github/workflows/scrape.yml` line 6:
 - Logs are retained for 90 days by default
 
 ## Manual Trigger
-- Actions tab → "StreetEasy Monitor - Scheduled Scraper" → "Run workflow" → "Run workflow"
+- Actions tab → "StreetSweeper - Scheduled Scraper" → "Run workflow" → "Run workflow"
 - Useful for testing or immediate runs without waiting for schedule
 
 ## Limitations

@@ -1,4 +1,4 @@
-Running StreetEasy Monitor — quick start
+Running StreetSweeper — quick start
 
 1) Create & activate a Python virtual environment
 

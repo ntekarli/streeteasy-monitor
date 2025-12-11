@@ -1,4 +1,4 @@
-name: StreetEasy Monitor - Scheduled Scraper
+name: StreetSweeper - Scheduled Scraper
 
 # Run every 30 minutes
 on:
@@ -32,6 +32,7 @@ jobs:
           SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          MAPS_STATIC_API_KEY: ${{ secrets.MAPS_STATIC_API_KEY }}
           MIN_PRICE: ${{ secrets.MIN_PRICE }}
           MAX_PRICE: ${{ secrets.MAX_PRICE }}
           MIN_BEDS: ${{ secrets.MIN_BEDS }}

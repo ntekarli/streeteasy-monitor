@@ -68,10 +68,16 @@ class Search:
         """Check the search URL for new listings."""
         print(f'Running script with parameters:\n{json.dumps(self.parameters, indent=2)}\n')
         print(f'URL: {self.url}')
-        self.r = self.session.get(self.url)
-        if self.r.status_code == 200:
-            parser = Parser(self.r.content, self.db)
-            self.listings = parser.listings
+        try:
+            self.r = self.session.get(self.url, timeout=30)
+            if self.r.status_code == 200:
+                parser = Parser(self.r.content, self.db)
+                self.listings = parser.listings
+            else:
+                print(f'{get_datetime()} Error: Received status code {self.r.status_code}\n')
+        except Exception as e:
+            print(f'{get_datetime()} Error fetching listings: {e}\n')
+            self.listings = []
 
         if not self.listings:
             print(f'{get_datetime()} No new listings.\n')

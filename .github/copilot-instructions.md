@@ -1,7 +1,7 @@
-# Copilot Instructions for StreetEasy Monitor
+# Copilot-Generated Instructions for StreetSweeper
 
 ## Project Overview
-StreetEasy Monitor is a rental listing scraper with messaging and web UI components. The project has three major execution paths:
+StreetSweeper is a rental listing scraper with messaging and web UI components. The project has three major execution paths:
 - **CLI**: `python main.py` - scrapes listings and sends messages based on search criteria
 - **Flask Web App**: `python -m app.app` - provides UI for manual searches and displays contacted listings
 - **Cron Jobs**: `cron/` scripts - manages background execution
