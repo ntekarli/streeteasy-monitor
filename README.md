@@ -1,7 +1,5 @@
 # StreetSweeper
-Python script that checks StreetEasy for new rentals matching search criteria and automatically messages new matches.
-
-Includes a Flask application that provides a messaging interface and displays contacted listings, plus optional helper scripts for setting up a cron job to run the script continuously.
+Python script that checks StreetEasy for new rentals matching search criteria.
 
 ### Features
 - Uses a [Requests](https://pypi.org/project/requests/) Session with [fake-useragent](https://pypi.org/project/fake-useragent/) to bypass request blocking
