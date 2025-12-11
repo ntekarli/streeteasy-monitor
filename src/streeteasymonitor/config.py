@@ -83,12 +83,14 @@ class Config:
         }
 
     def get_email_config(self):
+        port_str = self.env('SMTP_PORT', default='587')
+        port = int(port_str) if port_str else 587
         return {
             'server': self.env('SMTP_SERVER', default='smtp.gmail.com'),
-            'port': self.env.int('SMTP_PORT', default=587),
-            'username': self.env('SMTP_USERNAME', default='ntekarli@gmail.com'),
-            'password': self.env('SMTP_PASSWORD', default='xlza iyfw dsjb fkui'),
-            'recipient': self.env('EMAIL_RECIPIENT', default='ntekarli@gmail.com'),
+            'port': port,
+            'username': self.env('SMTP_USERNAME', default=''),
+            'password': self.env('SMTP_PASSWORD', default=''),
+            'recipient': self.env('EMAIL_RECIPIENT', default=''),
         }
 
     def get_field_values(self):
