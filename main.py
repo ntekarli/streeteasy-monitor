@@ -8,10 +8,11 @@ def main(**kwargs):
         listings = monitor.run()
         
         if listings:
-            # Send email notification for each listing
+            # Send batch email notification with all listings
             email_notifier = EmailNotifier(monitor.config.get_email_config())
-            for listing in listings:
-                if email_notifier.send_listing_notification(listing):
+            if email_notifier.send_batch_notification(listings):
+                # Insert all listings into database after successful email
+                for listing in listings:
                     monitor.db.insert_new_listing(listing)
 
 

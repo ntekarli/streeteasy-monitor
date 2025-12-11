@@ -22,7 +22,8 @@ class Database:
                     url TEXT,
                     price REAL,
                     address TEXT,
-                    neighborhood TEXT
+                    neighborhood TEXT,
+                    listed_by TEXT
                 )
             """)
             conn.commit()

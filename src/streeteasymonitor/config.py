@@ -88,6 +88,7 @@ class Config:
             'username': self.env('SMTP_USERNAME', default=''),
             'password': self.env('SMTP_PASSWORD', default=''),
             'recipient': self.env('EMAIL_RECIPIENT', default=''),
+            'maps_api_key': self.env('MAPS_STATIC_API_KEY', default=''),
         }
 
     def _parse_list(self, value: str):

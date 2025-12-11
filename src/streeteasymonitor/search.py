@@ -162,6 +162,13 @@ class Parser:
         neighborhood_match = re.search(r' in ([A-Z][^|$]+?)(?:\s+\d+|\||$)', full_text)
         if neighborhood_match:
             neighborhood = neighborhood_match.group(1).strip()
+        
+        # Find listed by (broker/management company)
+        listed_by = 'N/A'
+        for i, text in enumerate(all_text):
+            if text.lower() == 'listing by' and i + 1 < len(all_text):
+                listed_by = all_text[i + 1]
+                break
 
         return {
             'listing_id': listing_id,
@@ -169,6 +176,7 @@ class Parser:
             'price': price,
             'address': address,
             'neighborhood': neighborhood,
+            'listed_by': listed_by,
         }
 
     def filter(self, target) -> bool:
