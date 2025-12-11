@@ -2,7 +2,7 @@ import requests
 
 from src.streeteasymonitor.search import Search
 from src.streeteasymonitor.database import Database
-from src.streeteasymonitor.messager import Messager
+from src.streeteasymonitor.email_notifier import EmailNotifier
 from src.streeteasymonitor.config import Config
 
 
@@ -25,5 +25,7 @@ class Monitor:
     def run(self):
         self.search = Search(self)
         self.listings = self.search.fetch()
-        self.messager = Messager(self, self.listings)
-        self.messager.send_messages()
+        email_notifier = EmailNotifier(self.config.get_email_config())
+        for listing in self.listings:
+            if email_notifier.send_listing_notification(listing):
+                self.db.insert_new_listing(listing)

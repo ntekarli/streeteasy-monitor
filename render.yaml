@@ -1,0 +1,42 @@
+# Render deployment configuration for StreetEasy Monitor
+# 
+# How to deploy:
+# 1. Push this file + code to your GitHub fork
+# 2. Go to https://render.com, sign in, and connect your GitHub account
+# 3. Create a new "Background Worker" service
+# 4. Select your fork (yourusername/streeteasy-monitor)
+# 5. Set start command to: python main.py
+# 6. Add these environment variables in the Render dashboard:
+#    - SMTP_SERVER: smtp.gmail.com (or your provider)
+#    - SMTP_PORT: 587
+#    - SMTP_USERNAME: your-email@gmail.com
+#    - SMTP_PASSWORD: your-app-password
+#    - EMAIL_RECIPIENT: your-email@gmail.com
+# 7. Click "Deploy"
+# 
+# Once deployed, Render will:
+# - Watch your fork for pushes to main
+# - Auto-rebuild and restart on each push
+# - Keep the SQLite DB persistent (on paid tier; free tier resets on redeploy)
+#
+# For scheduled runs (e.g., every 30 min) instead of continuous:
+# - Use Render "Cron Jobs" or modify main.py to run once then exit
+# - Or use a different deployment (GitHub Actions, cloud scheduler, etc.)
+
+services:
+  - type: worker
+    name: streeteasy-monitor
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: SMTP_SERVER
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: EMAIL_RECIPIENT
+        sync: false
