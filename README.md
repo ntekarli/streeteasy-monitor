@@ -1,4 +1,4 @@
-# StreetEasy Monitor
+# StreetSweeper
 Python script that checks StreetEasy for new rentals matching search criteria and automatically messages new matches.
 
 Includes a Flask application that provides a messaging interface and displays contacted listings, plus optional helper scripts for setting up a cron job to run the script continuously.
