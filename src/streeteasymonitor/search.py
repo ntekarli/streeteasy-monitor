@@ -105,19 +105,67 @@ class Parser:
 
     def parse(self, card) -> dict[str, str]:
         """Parse the contents of one listing."""
-        listing_id = card.select_one('div.SRPCarousel-container')['data-listing-id']
-        url = card.select_one('a.listingCard-globalLink')['href']
-        price = Parser.price_pattern.sub('', card.select_one('span.price').text)
-        address = card.select_one('address.listingCard-addressLabel').text.strip()
-        neighborhood = (
-            card.select_one('div.listingCardBottom--upperBlock p.listingCardLabel')
-            .text.split(' in ')[-1]
-            .strip()
-        )
+        # Find the link to get URL and extract listing ID from it
+        link = card.find('a', href=re.compile(r'/building/[^/]+/\w+'))
+        if not link:
+            return None
+        
+        url = link['href']
+        # Extract building slug and unit ID from URL (e.g., /building/foo-bar/123)
+        match = re.search(r'/building/([^/]+)/(\w+)', url)
+        if match:
+            building_slug = match.group(1)
+            unit_id = match.group(2)
+            listing_id = f"{building_slug}_{unit_id}"
+        else:
+            return None
+        
+        # Find price (look for span with $ symbol)
+        price_elem = None
+        for elem in card.find_all('span'):
+            text = elem.get_text(strip=True)
+            if text.startswith('$') and text[1:].replace(',', '').isdigit():
+                price_elem = elem
+                break
+        
+        if not price_elem:
+            return None
+        
+        price = Parser.price_pattern.sub('', price_elem.get_text())
+        
+        # Get all text from card
+        all_text = list(card.stripped_strings)
+        
+        # Find address (look for text with street/avenue and apartment number like "#4A")
+        address = 'N/A'
+        for text in all_text:
+            # Skip "in [Neighborhood]" pattern
+            if text.startswith('in '):
+                continue
+            # Look for street addresses or building names with unit numbers
+            if ('#' in text or any(word in text.lower() for word in ['street', 'avenue', 'road', 'st ', 'ave '])) and len(text) > 10 and len(text) < 80:
+                address = text
+                break
+        
+        # If no address with # found, look for any address-like text
+        if address == 'N/A':
+            for text in all_text:
+                if text.startswith('in '):
+                    continue
+                if any(word in text for word in ['East', 'West', 'North', 'South']) and any(char.isdigit() for char in text) and len(text) > 10 and len(text) < 80:
+                    address = text
+                    break
+        
+        # Find neighborhood (usually appears after "in" in the text)
+        neighborhood = 'N/A'
+        full_text = ' '.join(all_text)
+        neighborhood_match = re.search(r' in ([A-Z][^|$]+?)(?:\s+\d+|\||$)', full_text)
+        if neighborhood_match:
+            neighborhood = neighborhood_match.group(1).strip()
 
         return {
             'listing_id': listing_id,
-            'url': url,
+            'url': f"https://streeteasy.com{url}" if not url.startswith('http') else url,
             'price': price,
             'address': address,
             'neighborhood': neighborhood,
@@ -138,7 +186,8 @@ class Parser:
     @property
     def listings(self) -> dict[str, str]:
         """Return all parsed and filtered listings."""
-        cards = self.soup.select('li.searchCardList--listItem')
-        parsed = [self.parse(card) for card in cards]
+        # Updated selector for new CSS modules-based class names
+        cards = self.soup.find_all('li', class_=re.compile(r'ListingCardsList_listCardWrapper'))
+        parsed = [self.parse(card) for card in cards if self.parse(card) is not None]
         filtered = [card for card in parsed if self.filter(card)]
         return filtered
