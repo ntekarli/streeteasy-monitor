@@ -9,12 +9,17 @@ def main(**kwargs):
             listings = monitor.run()
             
             if listings:
+                print(f'{monitor.config.get_datetime()} Found {len(listings)} listings')
+                # Insert all listings into database FIRST to prevent duplicates on retry
+                for listing in listings:
+                    monitor.db.insert_new_listing(listing)
+                
                 # Send batch email notification with all listings
                 email_notifier = EmailNotifier(monitor.config.get_email_config())
                 if email_notifier.send_batch_notification(listings):
-                    # Insert all listings into database after successful email
-                    for listing in listings:
-                        monitor.db.insert_new_listing(listing)
+                    print(f'{monitor.config.get_datetime()} Email sent and listings saved to database\n')
+                else:
+                    print(f'{monitor.config.get_datetime()} Email failed but listings were saved to prevent duplicate emails\n')
     except Exception as e:
         print(f'Fatal error in main: {e}')
         import traceback

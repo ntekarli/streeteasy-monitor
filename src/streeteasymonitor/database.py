@@ -50,3 +50,9 @@ class Database:
             cursor = conn.cursor()
             cursor.execute(sql, tuple(listing.values()))
             conn.commit()
+            
+            # Check if insert was successful (rowcount > 0)
+            if cursor.rowcount > 0:
+                from .utils import get_datetime
+                print(f'{get_datetime()} ✓ Saved listing: {listing.get("listing_id")} ({listing.get("address")})') 
+            # If rowcount == 0, it means IGNORE was triggered (duplicate key)
