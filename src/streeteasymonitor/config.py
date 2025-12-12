@@ -69,14 +69,15 @@ class Config:
         self._ua = UserAgent()  # Cache UserAgent instance for performance
 
     def get_headers(self):
-        user_agent = self._ua.random or 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'
+        user_agent = self._ua.random or 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'
         return {
             'user-agent': user_agent,
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
             'accept-language': 'en-US,en;q=0.9',
-            'referer': 'https://streeteasy.com/',
             'cache-control': 'no-cache',
-            'content-type': 'application/json',
-            'origin': 'https://streeteasy.com',
+            'pragma': 'no-cache',
+            'upgrade-insecure-requests': '1',
+            'referer': 'https://streeteasy.com/for-rent/nyc',
         }
 
     def get_email_config(self):
