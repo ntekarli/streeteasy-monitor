@@ -55,7 +55,7 @@ class Config:
         ],
         'neighborhood': [
             # 'Ocean Hill',
-            # 'Flatbush',
+            'Flatbush',
             # 'Bushwick',
             # 'Weeksville',
             # 'Stuyvesant Heights',
