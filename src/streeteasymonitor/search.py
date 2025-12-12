@@ -175,6 +175,16 @@ class Parser:
             if text.lower() == 'listing by' and i + 1 < len(all_text):
                 listed_by = all_text[i + 1]
                 break
+        
+        # Detect if listing is featured (has "Featured" badge or special styling)
+        is_featured = False
+        if 'featured' in full_text.lower():
+            is_featured = True
+        # Also check for special badge elements that might indicate featured status
+        for elem in card.find_all(['span', 'div', 'p']):
+            if 'featured' in elem.get_text().lower():
+                is_featured = True
+                break
 
         return {
             'listing_id': listing_id,
@@ -183,6 +193,7 @@ class Parser:
             'address': address,
             'neighborhood': neighborhood,
             'listed_by': listed_by,
+            'is_featured': is_featured,
         }
 
     def filter(self, target) -> bool:
@@ -190,10 +201,17 @@ class Parser:
         if target['listing_id'] in self.existing_ids:
             return False
 
-        for key, substrings in Config.filters.items():
+        for key, filter_values in Config.filters.items():
             target_value = target.get(key, '')
-            if any(substring in target_value for substring in substrings):
-                return False
+            
+            # Handle boolean filters (like is_featured)
+            if isinstance(target_value, bool):
+                if target_value in filter_values:
+                    return False
+            # Handle string filters (like address, neighborhood, url)
+            else:
+                if any(substring in str(target_value) for substring in filter_values):
+                    return False
 
         return True
 

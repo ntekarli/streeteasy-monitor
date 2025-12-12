@@ -23,7 +23,8 @@ class Database:
                     price REAL,
                     address TEXT,
                     neighborhood TEXT,
-                    listed_by TEXT
+                    listed_by TEXT,
+                    is_featured INTEGER DEFAULT 0
                 )
             """)
             conn.commit()

@@ -45,10 +45,7 @@ class Config:
     }
 
     filters = {
-        'url': [
-            '?featured=1',
-            '?infeed=1',
-        ],
+        'is_featured': [True],  # Exclude featured listings
         'address': [
             # 'Herkimer',
             # 'Fulton',
