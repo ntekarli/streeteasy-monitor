@@ -23,34 +23,10 @@ class Database:
                     price REAL,
                     address TEXT,
                     neighborhood TEXT,
-                    listed_by TEXT,
-                    is_featured INTEGER DEFAULT 0
+                    listed_by TEXT
                 )
             """)
             conn.commit()
-        
-        # Migrate existing tables to add is_featured column if missing
-        # Run this outside the CREATE TABLE transaction to handle existing databases
-        self._add_column_if_missing('is_featured', 'INTEGER DEFAULT 0')
-    
-    def _add_column_if_missing(self, column_name, column_definition):
-        """Add a column to the listings table if it doesn't exist."""
-        try:
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-                
-                # Check if column exists
-                cursor.execute("PRAGMA table_info(listings)")
-                columns = [info[1] for info in cursor.fetchall()]
-                
-                if column_name not in columns:
-                    cursor.execute(f"ALTER TABLE listings ADD COLUMN {column_name} {column_definition}")
-                    conn.commit()
-                    print(f"✓ Added column '{column_name}' to listings table")
-        except sqlite3.OperationalError as e:
-            # Column might already exist or there's another issue
-            # Log the error but don't crash
-            print(f"Warning: Could not add column '{column_name}': {e}")
 
     def get_existing_ids(self):
         with sqlite3.connect(self.db_path) as conn:
@@ -66,16 +42,16 @@ class Database:
             return [dict(row) for row in cursor.fetchall()]
 
     def insert_new_listing(self, listing):
-        # Ensure is_featured column exists before inserting
-        self._add_column_if_missing('is_featured', 'INTEGER DEFAULT 0')
+        # Remove is_featured field if present (used for filtering only, not stored)
+        listing_to_insert = {k: v for k, v in listing.items() if k != 'is_featured'}
         
-        columns = ', '.join(listing.keys())
-        placeholders = ', '.join('?' * len(listing))
+        columns = ', '.join(listing_to_insert.keys())
+        placeholders = ', '.join('?' * len(listing_to_insert))
         sql = f'INSERT OR IGNORE INTO listings ({columns}) VALUES ({placeholders})'
 
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(sql, tuple(listing.values()))
+            cursor.execute(sql, tuple(listing_to_insert.values()))
             conn.commit()
             
             # Check if insert was successful (rowcount > 0)
