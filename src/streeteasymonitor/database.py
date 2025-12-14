@@ -28,9 +28,10 @@ class Database:
                 )
             """)
             conn.commit()
-            
-            # Migrate existing tables to add is_featured column if missing
-            self._add_column_if_missing('is_featured', 'INTEGER DEFAULT 0')
+        
+        # Migrate existing tables to add is_featured column if missing
+        # Run this outside the CREATE TABLE transaction to handle existing databases
+        self._add_column_if_missing('is_featured', 'INTEGER DEFAULT 0')
     
     def _add_column_if_missing(self, column_name, column_definition):
         """Add a column to the listings table if it doesn't exist."""
