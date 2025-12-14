@@ -28,6 +28,23 @@ class Database:
                 )
             """)
             conn.commit()
+            
+            # Migrate existing tables to add is_featured column if missing
+            self._add_column_if_missing('is_featured', 'INTEGER DEFAULT 0')
+    
+    def _add_column_if_missing(self, column_name, column_definition):
+        """Add a column to the listings table if it doesn't exist."""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            
+            # Check if column exists
+            cursor.execute("PRAGMA table_info(listings)")
+            columns = [info[1] for info in cursor.fetchall()]
+            
+            if column_name not in columns:
+                cursor.execute(f"ALTER TABLE listings ADD COLUMN {column_name} {column_definition}")
+                conn.commit()
+                print(f"✓ Added column '{column_name}' to listings table")
 
     def get_existing_ids(self):
         with sqlite3.connect(self.db_path) as conn:
