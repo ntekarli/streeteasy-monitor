@@ -66,18 +66,51 @@ class Search:
 
     def fetch(self) -> list[dict[str, str]]:
         """Check the search URL for new listings."""
+        import time
+        
         print(f'Running script with parameters:\n{json.dumps(self.parameters, indent=2)}\n')
         print(f'URL: {self.url}')
-        try:
-            self.r = self.session.get(self.url, timeout=30)
-            if self.r.status_code == 200:
-                parser = Parser(self.r.content, self.db)
-                self.listings = parser.listings
-            else:
-                print(f'{get_datetime()} Error: Received status code {self.r.status_code}\n')
-        except Exception as e:
-            print(f'{get_datetime()} Error fetching listings: {e}\n')
-            self.listings = []
+        
+        # Retry logic with exponential backoff
+        max_retries = 3
+        retry_delay = 2  # seconds
+        
+        for attempt in range(max_retries):
+            try:
+                # On retry attempts, visit homepage first to establish session
+                if attempt > 0:
+                    print(f'{get_datetime()} Retry attempt {attempt}/{max_retries - 1}...')
+                    time.sleep(retry_delay * (2 ** (attempt - 1)))  # Exponential backoff
+                    # Visit homepage to look more like a real user
+                    self.session.get('https://streeteasy.com/for-rent/nyc', timeout=30)
+                    time.sleep(1)
+                
+                self.r = self.session.get(self.url, timeout=30)
+                
+                if self.r.status_code == 200:
+                    parser = Parser(self.r.content, self.db)
+                    self.listings = parser.listings
+                    break  # Success, exit retry loop
+                elif self.r.status_code in [403, 429]:
+                    print(f'{get_datetime()} Error: Received status code {self.r.status_code}')
+                    if attempt < max_retries - 1:
+                        print(f'{get_datetime()} Will retry with exponential backoff...\n')
+                        continue
+                    else:
+                        print(f'{get_datetime()} Max retries reached.\n')
+                else:
+                    print(f'{get_datetime()} Error: Received status code {self.r.status_code}\n')
+                    break
+                    
+            except Exception as e:
+                print(f'{get_datetime()} Error fetching listings: {e}')
+                if attempt < max_retries - 1:
+                    print(f'{get_datetime()} Will retry...\n')
+                    continue
+                else:
+                    print(f'{get_datetime()} Max retries reached.\n')
+                    self.listings = []
+                    break
 
         if not self.listings:
             print(f'{get_datetime()} No new listings.\n')
