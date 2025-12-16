@@ -33,6 +33,9 @@ class EmailNotifier:
 
     def _format_html_email(self, listings):
         """Format all listings as HTML email with photos and cards."""
+        import time
+        import random
+        
         # Build map image URL if API key is available
         map_img_html = ''
         if self.maps_api_key:
@@ -42,7 +45,12 @@ class EmailNotifier:
         
         # Build listing cards
         cards_html = ''
-        for listing in listings:
+        for i, listing in enumerate(listings):
+            # Add random delay between photo fetches (except for first one)
+            if i > 0:
+                delay = random.uniform(1.5, 3.5)
+                time.sleep(delay)
+            
             photo_url = self._get_listing_photo(listing['url'])
             
             cards_html += f'''
@@ -115,8 +123,9 @@ class EmailNotifier:
             }
             
             # Fetch the listing page
-            response = requests.get(listing_url, headers=headers, timeout=10)
+            response = requests.get(listing_url, headers=headers, timeout=15)
             if response.status_code != 200:
+                print(f"  Warning: Photo fetch returned status {response.status_code} for {listing_url}")
                 return self._get_placeholder_image()
             
             soup = BeautifulSoup(response.content, 'html.parser')
@@ -187,6 +196,9 @@ class EmailNotifier:
     
     def _build_static_map_url(self, listings):
         """Build Google Static Maps URL with markers for all listing addresses."""
+        import time
+        import random
+        
         if not self.maps_api_key or not listings:
             return None
         
@@ -195,7 +207,12 @@ class EmailNotifier:
         
         # Build markers parameter
         markers = []
-        for listing in map_listings:
+        for i, listing in enumerate(map_listings):
+            # Add random delay between address fetches (except for first one)
+            if i > 0:
+                delay = random.uniform(1.0, 2.5)
+                time.sleep(delay)
+            
             # Get full address with ZIP from listing page for accurate geocoding
             full_address = self._get_full_address_with_zip(listing['url'])
             
