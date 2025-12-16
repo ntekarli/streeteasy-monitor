@@ -1,9 +1,19 @@
 name: StreetSweeper - Scheduled Scraper
 
-# Run every 30 minutes
+# Run roughly every 2 hours from early morning to late night with randomness
+# Times (EST): ~7am, ~9am, ~11am, ~1pm, ~3pm, ~5pm, ~7pm, ~9pm, ~11pm, ~2am
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '12 11 * * *'  # ~7:12 AM EST
+    - cron: '27 13 * * *'  # ~9:27 AM EST
+    - cron: '43 15 * * *'  # ~11:43 AM EST
+    - cron: '18 17 * * *'  # ~1:18 PM EST
+    - cron: '51 19 * * *'  # ~3:51 PM EST
+    - cron: '09 21 * * *'  # ~5:09 PM EST
+    - cron: '34 23 * * *'  # ~7:34 PM EST
+    - cron: '22 1 * * *'   # ~9:22 PM EST
+    - cron: '47 3 * * *'   # ~11:47 PM EST
+    - cron: '15 6 * * *'   # ~2:15 AM EST (late night check)
   # Also allow manual trigger from Actions tab
   workflow_dispatch:
 
