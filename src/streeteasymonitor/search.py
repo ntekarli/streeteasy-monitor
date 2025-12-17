@@ -234,6 +234,13 @@ class Parser:
         if target['listing_id'] in self.existing_ids:
             return False
 
+        # STRICT: Only allow listings from neighborhoods we're actually searching for
+        # This prevents StreetEasy from including sponsored/similar listings from other areas
+        searched_neighborhoods = self.kwargs.get('areas', [])
+        if searched_neighborhoods and target.get('neighborhood') not in searched_neighborhoods:
+            print(f"  Filtering out {target.get('address')} - {target.get('neighborhood')} (not in search areas)")
+            return False
+
         for key, filter_values in Config.filters.items():
             target_value = target.get(key, '')
             
