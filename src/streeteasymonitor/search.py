@@ -88,7 +88,7 @@ class Search:
                 self.r = self.session.get(self.url, timeout=30)
                 
                 if self.r.status_code == 200:
-                    parser = Parser(self.r.content, self.db)
+                    parser = Parser(self.r.content, self.db, self.kwargs)
                     self.listings = parser.listings
                     break  # Success, exit retry loop
                 elif self.r.status_code in [403, 429]:
@@ -127,20 +127,23 @@ class Parser:
 
     price_pattern = re.compile(r'[$,]')
 
-    def __init__(self, content: bytes, db) -> None:
+    def __init__(self, content: bytes, db, kwargs: dict = None) -> None:
         """Initialize the parse object.
 
         Args:
             content (bytes): HTML content of a successful GET request to the search URL.
             db (Database): Database instance used for fetching listing IDs that already exist in the database.
+            kwargs (dict): Search parameters including areas for filtering.
 
         Attributes:
             soup (bs4.BeautifulSoup): Beautiful Soup object for parsing HTML contents.
             existing_ids (list[str]): Listing IDs that have already been stored in the database.
+            kwargs (dict): Search parameters for filtering.
         """
 
         self.soup = BeautifulSoup(content, 'html.parser')
         self.existing_ids = db.get_existing_ids()
+        self.kwargs = kwargs or {}
 
     def parse(self, card) -> dict[str, str]:
         """Parse the contents of one listing."""
