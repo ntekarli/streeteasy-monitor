@@ -227,9 +227,10 @@ class EmailNotifier:
             return None
         
         # Build complete URL
+        # Note: No zoom/center specified - Google Maps will auto-fit to show all markers
         markers_str = '&'.join(markers)
-        map_url = f"https://maps.googleapis.com/maps/api/staticmap?size=600x300&zoom=16&maptype=roadmap&{markers_str}&key={self.maps_api_key}"
-        
+        map_url = f"https://maps.googleapis.com/maps/api/staticmap?size=600x300&maptype=roadmap&{markers_str}&key={self.maps_api_key}"
+
         return map_url
 
     def _send_email(self, subject, html_body, text_body):
