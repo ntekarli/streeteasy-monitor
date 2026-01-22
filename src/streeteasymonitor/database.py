@@ -34,17 +34,65 @@ class Database:
             cursor.execute('SELECT listing_id FROM listings')
             return set(row[0] for row in cursor.fetchall())
 
-    def get_listings_sorted(self):
+    def get_listings_sorted(self, limit=None):
+        """Get all listings sorted by created_at descending.
+
+        Args:
+            limit (int, optional): Maximum number of results to return. Defaults to None (all results).
+
+        Returns:
+            list[dict]: List of listing dictionaries.
+        """
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM listings ORDER BY created_at DESC')
+            if limit:
+                cursor.execute('SELECT * FROM listings ORDER BY created_at DESC LIMIT ?', (limit,))
+            else:
+                cursor.execute('SELECT * FROM listings ORDER BY created_at DESC')
             return [dict(row) for row in cursor.fetchall()]
 
+    def get_statistics(self):
+        """Get database statistics.
+
+        Returns:
+            dict: Statistics including total count, average price, etc.
+        """
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+
+            # Total count
+            cursor.execute('SELECT COUNT(*) FROM listings')
+            total = cursor.fetchone()[0]
+
+            # Average price
+            cursor.execute('SELECT AVG(price) FROM listings')
+            avg_price = cursor.fetchone()[0] or 0
+
+            # Unique neighborhoods count
+            cursor.execute('SELECT COUNT(DISTINCT neighborhood) FROM listings WHERE neighborhood IS NOT NULL')
+            neighborhoods = cursor.fetchone()[0]
+
+            return {
+                'total_listings': total,
+                'avg_price': avg_price,
+                'neighborhoods_count': neighborhoods
+            }
+
     def insert_new_listing(self, listing):
-        # Remove is_featured field if present (used for filtering only, not stored)
-        listing_to_insert = {k: v for k, v in listing.items() if k != 'is_featured'}
-        
+        # Whitelist allowed columns to prevent SQL injection
+        ALLOWED_COLUMNS = {'listing_id', 'url', 'price', 'address', 'neighborhood', 'listed_by'}
+
+        # Remove is_featured field and any other non-whitelisted fields
+        listing_to_insert = {
+            k: v for k, v in listing.items()
+            if k in ALLOWED_COLUMNS
+        }
+
+        if not listing_to_insert:
+            raise ValueError('No valid columns to insert')
+
+        # Build query with whitelisted columns
         columns = ', '.join(listing_to_insert.keys())
         placeholders = ', '.join('?' * len(listing_to_insert))
         sql = f'INSERT OR IGNORE INTO listings ({columns}) VALUES ({placeholders})'
@@ -53,9 +101,9 @@ class Database:
             cursor = conn.cursor()
             cursor.execute(sql, tuple(listing_to_insert.values()))
             conn.commit()
-            
+
             # Check if insert was successful (rowcount > 0)
             if cursor.rowcount > 0:
                 from .utils import get_datetime
-                print(f'{get_datetime()} ✓ Saved listing: {listing.get("listing_id")} ({listing.get("address")})') 
+                print(f'{get_datetime()} ✓ Saved listing: {listing.get("listing_id")} ({listing.get("address")})')
             # If rowcount == 0, it means IGNORE was triggered (duplicate key)

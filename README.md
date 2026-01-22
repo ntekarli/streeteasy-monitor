@@ -29,16 +29,21 @@ Run the script using the values in the `defaults` dictionary found in `src/stree
 (.venv) $ python main.py
 ```
 
-### Run Flask application 
+### Run Flask application
 The application will run on port 8002 by default (can be changed in `app/app.py`).
 ```bash
 (.venv) $ python -m app.app
 ```
-The application consists of:
-- A form that can be used to check for listings based on specified criteria
-- A table listing every rental that has been contacted so far, sorted by most recent
+The web application features:
+- **Secure Authentication**: Login system with password protection (single-user)
+- **Dashboard**: Statistics overview showing total listings, average price, and recent finds
+- **All Listings**: Browse all listings with filtering by neighborhood and price range
+- **Run Search**: Form to trigger new searches with custom parameters
+- **Rate Limiting**: Protection against abuse with configurable request limits
 
 When possible, listings link to their corresponding page on [Paddaddy](https://paddaddy.app/), and otherwise link to the original page on StreetEasy.
+
+**Note:** Login credentials are configured via environment variables (see Configuration section below).
 
 ![screenshot](assets/screenshot.png)
 
@@ -95,18 +100,25 @@ $ pyenv local .venv
 
 ## Configuration
 
-### Add message and contact info
+### Environment Variables
 
-Edit the `.env` file to include your desired message, along with your phone number, email, and name. A placeholder file with placeholder values is included in the root directory. All fields are required.
-```
-MESSAGE='[YOUR MESSAGE]'
-PHONE='[YOUR PHONE NUMBER]'
-EMAIL='[YOUR EMAIL ADDRESS]'
-NAME='[YOUR NAME]'
-```
-When the script runs, any matching listings will be sent the above information, and an automated email from StreetEasy will be sent to the address you provided indicating that the message has been sent.
+Create a `.env` file in the root directory based on the `.env.example` template:
 
-*Note: this information is not visible or accessible anywhere other than your local `.env` file.*
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` with your specific values. Required variables include:
+- Flask authentication credentials
+- SMTP email configuration
+- Google Maps API key (optional)
+- Search parameters (optional, can use defaults)
+
+**Important Security Notes:**
+- Never commit your `.env` file to version control (already in `.gitignore`)
+- Use strong, unique passwords for all credentials
+- For Gmail SMTP, use an [App Password](https://support.google.com/accounts/answer/185833)
+- See `.env.example` for the complete list of configuration options
 
 ### Configure default search parameters and optional filters
 If you choose to run the script by itself or in a cron job, edit the `defaults` dictionary found in `src/streeteasymonitor/config.py` according to your preferences. When running the script using the Flask application, your form inputs override the defaults defined here.
@@ -172,11 +184,16 @@ This is a blunt tool that casts a wide net by design and there may be many listi
 - [x] Add no fee and amenities options in Flask
 - [x] Persist form fields after successful submission
 - [x] Implement dynamic form submission
-- [ ] Add navbar, improve page layout
+- [x] Add navbar, improve page layout
+- [x] Add authentication system
+- [x] Add dashboard with statistics
+- [x] Add filtering for listings view
+- [x] Add alert messages
+- [x] Add rate limiting
+- [x] Add input validation
 - [ ] Add form fields for name, email, message, and phone number
 - [ ] Add more methods for running continuously (APScheduler?)
 - [ ] Add pagination for results table
-- [ ] Add alert messages
 - [ ] Document all classes
 - [ ] Build tests
 

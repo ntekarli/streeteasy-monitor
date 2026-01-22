@@ -1,3 +1,6 @@
+import random
+import time
+
 from src.streeteasymonitor.monitor import Monitor
 from src.streeteasymonitor.config import Config
 from src.streeteasymonitor.email_notifier import EmailNotifier
@@ -5,6 +8,12 @@ from src.streeteasymonitor.utils import get_datetime
 
 
 def main(**kwargs):
+    # Add random delay (0-30 seconds) to avoid predictable timing patterns
+    # This helps prevent detection when running on schedules
+    delay = random.uniform(0, 30)
+    print(f'{get_datetime()} Starting in {delay:.1f} seconds to randomize timing...')
+    time.sleep(delay)
+
     try:
         with Monitor(**kwargs) as monitor:
             listings = monitor.run()

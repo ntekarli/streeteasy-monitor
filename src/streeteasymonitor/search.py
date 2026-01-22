@@ -41,14 +41,39 @@ class Search:
         self.db = monitor.db
         self.kwargs = monitor.kwargs
 
+        # Validate required parameters
+        if not self.kwargs.get('areas'):
+            raise ValueError('At least one area must be specified for the search')
+
+        # Validate that all areas exist in the area map
+        invalid_areas = [area for area in self.kwargs['areas'] if area not in Search.area_map]
+        if invalid_areas:
+            raise ValueError(f'Invalid area(s): {", ".join(invalid_areas)}')
+
         self.codes = [Search.area_map[area] for area in self.kwargs['areas']]
+
+        # Validate price range
+        min_price = self.kwargs.get('min_price', 0)
+        max_price = self.kwargs.get('max_price', 0)
+        if min_price < 0 or max_price < 0:
+            raise ValueError('Price values must be non-negative')
+        if max_price > 0 and min_price > max_price:
+            raise ValueError('Minimum price cannot be greater than maximum price')
+
+        # Validate bedroom range
+        min_beds = self.kwargs.get('min_beds', 0)
+        max_beds = self.kwargs.get('max_beds', 0)
+        if min_beds < 0 or max_beds < 0:
+            raise ValueError('Bedroom values must be non-negative')
+        if max_beds > 0 and min_beds > max_beds:
+            raise ValueError('Minimum beds cannot be greater than maximum beds')
 
         self.area = ','.join(self.codes)
         self.price = f"{self.kwargs['min_price']}-{self.kwargs['max_price']}"
         self.beds = f"{self.kwargs['min_beds']}-{self.kwargs['max_beds']}"
         self.baths = f">={self.kwargs['baths']}"
-        self.amenities = f"{','.join(self.kwargs['amenities'])}"
-        self.no_fee = f"{1 if self.kwargs['no_fee'] == True else ''}"
+        self.amenities = f"{','.join(self.kwargs.get('amenities', []))}"
+        self.no_fee = f"{1 if self.kwargs.get('no_fee') == True else ''}"
 
 
         self.parameters = {
@@ -67,24 +92,29 @@ class Search:
     def fetch(self) -> list[dict[str, str]]:
         """Check the search URL for new listings."""
         import time
-        
+
         print(f'Running script with parameters:\n{json.dumps(self.parameters, indent=2)}\n')
         print(f'URL: {self.url}')
-        
+
         # Retry logic with exponential backoff
         max_retries = 3
         retry_delay = 2  # seconds
-        
+
         for attempt in range(max_retries):
             try:
-                # On retry attempts, visit homepage first to establish session
-                if attempt > 0:
+                # Always visit homepage first to establish session like a real user
+                # This helps avoid 403 errors
+                if attempt == 0:
+                    # First attempt - visit homepage to establish cookies
+                    self.session.get('https://streeteasy.com/', timeout=30)
+                    time.sleep(1.5)  # Small delay between requests
+                else:
                     print(f'{get_datetime()} Retry attempt {attempt}/{max_retries - 1}...')
                     time.sleep(retry_delay * (2 ** (attempt - 1)))  # Exponential backoff
-                    # Visit homepage to look more like a real user
+                    # Visit homepage again to refresh session
                     self.session.get('https://streeteasy.com/for-rent/nyc', timeout=30)
-                    time.sleep(1)
-                
+                    time.sleep(2)
+
                 self.r = self.session.get(self.url, timeout=30)
                 
                 if self.r.status_code == 200:

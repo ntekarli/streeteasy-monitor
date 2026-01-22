@@ -8,6 +8,8 @@ click==8.1.7
 environs==11.0.0
 fake-useragent==1.5.1
 Flask==3.0.3
+Flask-Limiter==3.5.0
+Flask-Login==0.6.3
 Flask-WTF==1.2.1
 idna==3.7
 itsdangerous==2.2.0

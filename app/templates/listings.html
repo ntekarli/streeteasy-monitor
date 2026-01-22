@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    All Listings - StreetEasy Monitor
+{% endblock %}
+
+{% block main %}
+
+<div class="container mt-4">
+    <h1 class="mb-4">All Listings</h1>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('listings') }}" class="row g-3">
+                <div class="col-md-4">
+                    <label for="neighborhood" class="form-label">Neighborhood</label>
+                    <select class="form-select" id="neighborhood" name="neighborhood">
+                        <option value="">All Neighborhoods</option>
+                        {% for n in all_neighborhoods %}
+                            <option value="{{ n }}" {% if n == current_neighborhood %}selected{% endif %}>{{ n }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="min_price" class="form-label">Min Price</label>
+                    <input type="number" class="form-control" id="min_price" name="min_price"
+                           value="{{ current_min_price or '' }}" placeholder="No minimum">
+                </div>
+                <div class="col-md-3">
+                    <label for="max_price" class="form-label">Max Price</label>
+                    <input type="number" class="form-control" id="max_price" name="max_price"
+                           value="{{ current_max_price or '' }}" placeholder="No maximum">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results count -->
+    <p class="text-muted">Showing {{ listings|length }} listing(s)</p>
+
+    <!-- Listings Table -->
+    {% if listings %}
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Contacted</th>
+                        <th scope="col">Address</th>
+                        <th scope="col">Neighborhood</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Listed By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for listing in listings %}
+                    <tr>
+                        <td>{{ listing["created_at"] | format_datetime }}</td>
+                        <td><a href='/{{ listing["url"] }}' target="_blank">{{ listing["address"] }}</a></td>
+                        <td>{{ listing["neighborhood"] }}</td>
+                        <td>{{ listing["price"] | usd }}</td>
+                        <td>{{ listing["listed_by"] or 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            No listings found matching your criteria. Try adjusting your filters.
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}
